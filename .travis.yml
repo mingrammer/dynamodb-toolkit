@@ -1,0 +1,14 @@
+language: go
+
+go:
+  - "1.10"
+  - "1.11"
+  - "master"
+
+os:
+  - linux
+  - osx
+
+script:
+  - env GO111MODULE=on make build
+  - env GO111MODULE=on make test

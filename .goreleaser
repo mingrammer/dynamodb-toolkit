@@ -1,0 +1,51 @@
+project_name: dynamodb-toolkit
+
+before:
+  hooks:
+    - go mod download
+
+builds:
+  - main: .
+    binary: dynamotk
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - Update README.md
+    - Merge pull request
+    - Merge branch
+
+archive:
+  format: tar.gz
+  name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+  files:
+    - LICENSE
+    - README.md
+
+release:
+  github:
+    owner: mingrammer
+    name: dynamodb-toolkit
+  name_template: '{{.Tag}}'
+
+brew:
+  name: dynamodb-toolkit
+  github:
+    owner: mingrammer
+    name: homebrew-taps
+  commit_author:
+    name: mingrammer
+    email: mingrammer@gmail.com
+  homepage: https://github.com/mingrammer/dynamodb-toolkit
+  description: "A command line dynamodb toolkit"
+  install: bin.install "dynamotk"
+  test: |
+    system "#{bin}/dynamotk -v"
