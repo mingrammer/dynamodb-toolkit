@@ -48,21 +48,21 @@ Download gzip file from [Github Releases](https://github.com/mingrammer/dynamodb
 
 ### Truncate
 
-```bash
+```console
 # Truncate the `user` table from local dynamodb.
-$ dynamotk --endpoint http://localhost:8000 truncate --table-names user
+dynamotk --endpoint http://localhost:8000 truncate --table-names user
 
 # Truncate the `user`, `item` tables from aws dynamodb with default credentials.
-$ dynamotk truncate --table-names user,item
+dynamotk truncate --table-names user,item
 
 # You can also pass the `access key id`, `secret access key`, `profile` and `region` optionally. (see `dynamotk -h`)
-$ dynamotk --access-key-id xxx --secret-access-key xxx --region ap-northeast-2 truncate --table-names user,item
+dynamotk --access-key-id xxx --secret-access-key xxx truncate --table-names user,item
 
 # Truncation is just (concurrently) repeating the delete operations for all keys.
 # So if your tables are big, there could be cost overhead.
 # In this case, you can use `--recreate` option.
 # It will delete the table itself and recreate the table while preserving the description.
-$ dynamotk --profile prod truncate --table-names largetable --recreate
+dynamotk --profile prod --region ap-northeast-2 truncate --table-names largetable --recreate
 ```
 
 ## License
