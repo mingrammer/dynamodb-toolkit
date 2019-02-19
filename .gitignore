@@ -3,3 +3,6 @@
 
 # vendor
 vendor/
+
+# build
+dist/
