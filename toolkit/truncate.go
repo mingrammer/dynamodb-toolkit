@@ -102,7 +102,7 @@ func (t *Truncator) truncate(table string) error {
 	for i := int64(0); i < totalSegments; i++ {
 		go func(segment int64) {
 			defer wg.Done()
-			cfmt.Infof("Truncating the table '%s'...\n", table)
+			cfmt.Infof("[%d/%d] Truncating the table '%s'...\n", segment+1, totalSegments, table)
 			scanned, err := t.client.Scan(&dynamodb.ScanInput{
 				TableName:       aws.String(table),
 				AttributesToGet: keys,
@@ -116,7 +116,7 @@ func (t *Truncator) truncate(table string) error {
 			if err != nil {
 				errc <- err
 			}
-			cfmt.Successf("Table '%s' was truncated successfully.\n", table)
+			cfmt.Successf("[%d/%d] Table '%s' was truncated successfully.\n", segment+1, totalSegments, table)
 		}(i)
 	}
 	go func() {
