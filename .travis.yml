@@ -10,5 +10,5 @@ os:
   - osx
 
 script:
-  - env GO111MODULE=on make build
-  - env GO111MODULE=on make test
+  - make build
+  - make test
