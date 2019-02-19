@@ -42,7 +42,7 @@ Download gzip file from [Github Releases](https://github.com/mingrammer/dynamodb
 ## Features
 
 - Table truncate
-- coming soon... (maybe dump/restore features)
+- Coming soon... (maybe dump/restore features)
 
 ## Usage
 
@@ -58,8 +58,10 @@ $ dynamotk truncate --table-names user,item
 # You can also pass the `access key id`, `secret access key`, `profile` and `region` optionally. (see `dynamotk -h`)
 $ dynamotk --access-key-id xxx --secret-access-key xxx --region ap-northeast-2 truncate --table-names user,item
 
-# Truncation is just (concurrently) repeating the delete operations for all keys. So if your tables are big, there could be cost overhead.
-# In this case, you can use `--recreate` option. It will not use delete operations, but just delete the table itself and recreate the table while preserving the table description.
+# Truncation is just (concurrently) repeating the delete operations for all keys.
+# So if your tables are big, there could be cost overhead.
+# In this case, you can use `--recreate` option.
+# It will delete the table itself and recreate the table while preserving the description.
 $ dynamotk --profile prod truncate --table-names largetable --recreate
 ```
 
