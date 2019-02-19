@@ -16,7 +16,7 @@ A command line dynamodb toolkit
 
 <br><br><br>
 
-dynamotk is a command line tool for aws dynamodb that provides some useful utilities that are not supported by dynamodb operations and official aws cli tools. 
+dynamotk is a command line toolkit for aws dynamodb that provides some useful utilities that are not supported by dynamodb operations and official aws cli tools. 
 
 ## Installation
 

@@ -45,7 +45,7 @@ brew:
     name: mingrammer
     email: mingrammer@gmail.com
   homepage: https://github.com/mingrammer/dynamodb-toolkit
-  description: "A command line dynamodb toolkit"
+  description: "A command line toolkit for aws dynamodb"
   install: bin.install "dynamotk"
   test: |
     system "#{bin}/dynamotk -v"
