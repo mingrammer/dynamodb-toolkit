@@ -59,7 +59,7 @@ dynamotk truncate --table-names user,item
 dynamotk --access-key-id xxx --secret-access-key xxx truncate --table-names user,item
 
 # Truncation is just (concurrently) repeating the delete operations for all keys.
-# So if your tables are big, there could be cost overhead.
+# So if your tables are big, it can cause cost overhead.
 # In this case, you can use `--recreate` option.
 # It will delete the table itself and recreate the table while preserving the description.
 dynamotk --profile prod --region ap-northeast-2 truncate --table-names largetable --recreate
