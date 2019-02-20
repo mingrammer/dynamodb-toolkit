@@ -11,7 +11,7 @@
 
 
 <p align="center">
-A command line dynamodb toolkit
+A command line toolkit for aws dynamodb
 </p>
 
 <br><br><br>
