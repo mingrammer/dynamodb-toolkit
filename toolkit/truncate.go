@@ -149,13 +149,16 @@ func (t *Truncator) recreate(table string) error {
 	cfmt.Infof("Recreating the table '%s'...\n", table)
 	input := &dynamodb.CreateTableInput{
 		AttributeDefinitions: meta.Table.AttributeDefinitions,
-		BillingMode:          meta.Table.BillingModeSummary.BillingMode,
 		KeySchema:            meta.Table.KeySchema,
-		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+		TableName:            meta.Table.TableName,
+	}
+	if meta.Table.BillingModeSummary != nil {
+		input.SetBillingMode(*meta.Table.BillingModeSummary.BillingMode)
+	} else {
+		input.SetProvisionedThroughput(&dynamodb.ProvisionedThroughput{
 			ReadCapacityUnits:  meta.Table.ProvisionedThroughput.ReadCapacityUnits,
 			WriteCapacityUnits: meta.Table.ProvisionedThroughput.WriteCapacityUnits,
-		},
-		TableName: meta.Table.TableName,
+		})
 	}
 	if meta.Table.StreamSpecification != nil {
 		input.SetStreamSpecification(meta.Table.StreamSpecification)
