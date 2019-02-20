@@ -65,6 +65,12 @@ dynamotk --access-key-id xxx --secret-access-key xxx truncate --table-names user
 dynamotk --profile prod --region ap-northeast-2 truncate --table-names largetable --recreate
 ```
 
+## Known issues
+
+When throttling happens, `dynamotk` does not retry read or write (delete request), so some items could be remaining not deleted. I should support `backoff-retry` algorithm to fix it.
+
+For now, you should run the `truncate` command multiple times until the table becomes empty to overcome this issue or use `--recreate` option.
+
 ## License
 
 MIT
