@@ -17,7 +17,7 @@ const (
 	name      = "dynamotk"
 	author    = "mingrammer"
 	email     = "mingrammer@gmail.com"
-	version   = "0.0.1"
+	version   = "0.0.2"
 	usage     = "A command line toolkit for AWS DyanmoDB"
 	usageText = "dynamotk [OPTIONS] command [OPTIONS/FLAGS]"
 )
