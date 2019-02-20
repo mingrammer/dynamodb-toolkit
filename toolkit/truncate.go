@@ -93,16 +93,18 @@ func (t *Truncator) truncate(table string) error {
 	totalSegments = calc.Min(totalSegments, maxTotalSegments)
 	if totalSegments == 0 {
 		cfmt.Warningf("Table '%s' has no items.\n", table)
+		return nil
 	}
 
 	// Delete all keys
+	cfmt.Successf("[%d/%d] Truncating the table '%s'...\n", 0, totalSegments, table)
 	errc := make(chan error, 1)
 	wg := sync.WaitGroup{}
 	wg.Add(int(totalSegments))
 	for i := int64(0); i < totalSegments; i++ {
 		go func(segment int64) {
 			defer wg.Done()
-			cfmt.Infof("[%d/%d] Truncating the table '%s'...\n", segment+1, totalSegments, table)
+			cfmt.Infof("[%d/%d] Deleting the %d segment of table '%s'...\n", segment+1, totalSegments, segment, table)
 			scanned, err := t.client.Scan(&dynamodb.ScanInput{
 				TableName:       aws.String(table),
 				AttributesToGet: keys,
@@ -116,11 +118,12 @@ func (t *Truncator) truncate(table string) error {
 			if err != nil {
 				errc <- err
 			}
-			cfmt.Successf("[%d/%d] Table '%s' was truncated successfully.\n", segment+1, totalSegments, table)
+			cfmt.Successf("[%d/%d] The %d segment of table '%s' was deleted.\n", segment+1, totalSegments, segment, table)
 		}(i)
 	}
 	go func() {
 		wg.Wait()
+		cfmt.Successf("[%d/%d] Table '%s' was truncated successfully.\n", totalSegments, totalSegments, table)
 		close(errc)
 	}()
 	return <-errc
