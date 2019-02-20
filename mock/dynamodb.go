@@ -72,20 +72,23 @@ func (d *DynamoDBClient) CreateTable(input *dynamodb.CreateTableInput) (*dynamod
 	table := &table{
 		desc: &dynamodb.TableDescription{
 			AttributeDefinitions: input.AttributeDefinitions,
-			BillingModeSummary: &dynamodb.BillingModeSummary{
-				BillingMode: input.BillingMode,
-			},
-			CreationDateTime: aws.Time(time.Now()),
-			ItemCount:        aws.Int64(0),
-			KeySchema:        input.KeySchema,
-			ProvisionedThroughput: &dynamodb.ProvisionedThroughputDescription{
-				ReadCapacityUnits:  input.ProvisionedThroughput.ReadCapacityUnits,
-				WriteCapacityUnits: input.ProvisionedThroughput.WriteCapacityUnits,
-			},
-			TableName:      &name,
-			TableSizeBytes: aws.Int64(0),
+			CreationDateTime:     aws.Time(time.Now()),
+			ItemCount:            aws.Int64(0),
+			KeySchema:            input.KeySchema,
+			TableName:            &name,
+			TableSizeBytes:       aws.Int64(0),
 		},
 		items: []map[string]*dynamodb.AttributeValue{},
+	}
+	if input.BillingMode != nil {
+		table.desc.SetBillingModeSummary(&dynamodb.BillingModeSummary{
+			BillingMode: input.BillingMode,
+		})
+	} else {
+		table.desc.SetProvisionedThroughput(&dynamodb.ProvisionedThroughputDescription{
+			ReadCapacityUnits:  input.ProvisionedThroughput.ReadCapacityUnits,
+			WriteCapacityUnits: input.ProvisionedThroughput.WriteCapacityUnits,
+		})
 	}
 	d.tables[name] = table
 	return &dynamodb.CreateTableOutput{
