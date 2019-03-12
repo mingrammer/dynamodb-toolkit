@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"sync"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -11,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"github.com/mingrammer/cfmt"
 	"github.com/mingrammer/dynamodb-toolkit/calc"
+	"github.com/mingrammer/dynamodb-toolkit/retryer"
 )
 
 // Truncator holds dynamodb client
@@ -18,8 +20,9 @@ type Truncator struct {
 	client dynamodbiface.DynamoDBAPI
 }
 
-const megabyte = 1 << 20
 const (
+	megabyte = 1 << 20
+
 	maxTotalSegments = 1000000
 	deleteChunk      = 25
 )
@@ -59,13 +62,22 @@ func (t *Truncator) delete(table string, scanned *dynamodb.ScanOutput) error {
 		if (i+1)%deleteChunk == 0 || i >= int(*scanned.Count)-1 {
 			go func(reqChunk []*dynamodb.WriteRequest) {
 				defer wg.Done()
-				_, err := t.client.BatchWriteItem(&dynamodb.BatchWriteItemInput{
-					RequestItems: map[string][]*dynamodb.WriteRequest{
-						table: reqChunk,
-					},
-				})
-				if err != nil {
-					errc <- err
+				unprocessed := map[string][]*dynamodb.WriteRequest{
+					table: reqChunk,
+				}
+				attempts := 0
+				for len(unprocessed[table]) > 0 {
+					if attempts > 0 {
+						time.Sleep(retryer.RetryBackoff(attempts))
+					}
+					output, err := t.client.BatchWriteItem(&dynamodb.BatchWriteItemInput{
+						RequestItems: unprocessed,
+					})
+					if err != nil {
+						errc <- err
+					}
+					unprocessed = output.UnprocessedItems
+					attempts++
 				}
 			}(req)
 			req = []*dynamodb.WriteRequest{}
@@ -105,18 +117,29 @@ func (t *Truncator) truncate(table string) error {
 		go func(segment int64) {
 			defer wg.Done()
 			cfmt.Infof("[%d/%d] Deleting the %d segment of table '%s'...\n", segment+1, totalSegments, segment, table)
-			scanned, err := t.client.Scan(&dynamodb.ScanInput{
-				TableName:       aws.String(table),
-				AttributesToGet: keys,
-				Segment:         aws.Int64(segment),
-				TotalSegments:   aws.Int64(totalSegments),
-			})
-			if err != nil {
-				errc <- err
-			}
-			err = t.delete(table, scanned)
-			if err != nil {
-				errc <- err
+			startKey := map[string]*dynamodb.AttributeValue{}
+			attempts := 0
+			for {
+				if attempts > 0 {
+					time.Sleep(retryer.RetryBackoff(attempts))
+				}
+				scanned, err := t.client.Scan(&dynamodb.ScanInput{
+					TableName:         aws.String(table),
+					AttributesToGet:   keys,
+					ExclusiveStartKey: startKey,
+					Segment:           aws.Int64(segment),
+					TotalSegments:     aws.Int64(totalSegments),
+				})
+				if err != nil {
+					errc <- err
+				}
+				if err = t.delete(table, scanned); err != nil {
+					errc <- err
+				}
+				startKey = scanned.LastEvaluatedKey
+				if len(startKey) == 0 {
+					break
+				}
 			}
 			cfmt.Successf("[%d/%d] The %d segment of table '%s' was deleted.\n", segment+1, totalSegments, segment, table)
 		}(i)
@@ -148,7 +171,7 @@ func (t *Truncator) recreate(table string) error {
 	}
 	cfmt.Successf("Table '%s' was deleted.\n", table)
 
-	// Create the table and wait until complete
+	// Make create table input
 	cfmt.Infof("Recreating the table '%s'...\n", table)
 	input := &dynamodb.CreateTableInput{
 		AttributeDefinitions: meta.Table.AttributeDefinitions,
@@ -192,6 +215,8 @@ func (t *Truncator) recreate(table string) error {
 	if len(globalSecondaryIndexes) > 0 {
 		input.SetLocalSecondaryIndexes(localSecondaryIndexes)
 	}
+
+	// Create the table and wait until complete
 	_, err = t.client.CreateTable(input)
 	if err != nil {
 		return err
