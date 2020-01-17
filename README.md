@@ -25,7 +25,7 @@ dynamotk is a command line toolkit for aws dynamodb that provides some useful ut
 > Go version 1.10 or higher is required.
 
 ```
-go get github.com/mingrammer/dynamodb-toolkit
+go get github.com/mingrammer/dynamodb-toolkit/cmd/dynamotk
 ```
 
 ### Using [homebrew](https://brew.sh)
