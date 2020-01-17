@@ -16,13 +16,13 @@ A command line toolkit for aws dynamodb
 
 <br><br><br>
 
-dynamotk is a command line toolkit for aws dynamodb that provides some useful utilities that are not supported by dynamodb operations and official aws cli tools. 
+dynamotk is a command line toolkit for aws dynamodb that provides some useful utilities that are not supported by dynamodb operations and official aws cli tools.
 
 ## Installation
 
 ### Using go get
 
-> Go version 1.10 or higher is required.
+> Go version 1.13 or higher is required.
 
 ```
 go get github.com/mingrammer/dynamodb-toolkit/cmd/dynamotk
