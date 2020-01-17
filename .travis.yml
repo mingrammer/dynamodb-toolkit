@@ -1,6 +1,7 @@
 language: go
 
 go:
+  - "1.11"
   - "1.12"
   - "1.13"
   - "master"
@@ -9,6 +10,8 @@ os:
   - linux
   - osx
 
+env:
+  - GO111MODULE=on
+
 script:
-  - go get -d ./...
   - go test -v ./...
